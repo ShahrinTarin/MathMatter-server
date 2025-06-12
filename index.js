@@ -91,7 +91,6 @@ async function run() {
     })
 
     app.post('/wishlist/:blogId', async (req, res) => {
-      //  const id = req.params.blogId;
       const wishlistBlogs = req.body
       const result = await wishlistCollection.insertOne(wishlistBlogs)
       res.send(result)
