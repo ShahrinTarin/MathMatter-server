@@ -82,17 +82,7 @@ async function run() {
       res.send(result);
     })
 
-    // app.get('/wishlist', async (req, res) => {
-    //    const { searchParams } = req.query
-
-    //   let query = {}
-    //   if (searchParams) {
-    //     query = { cuisine: { $regex: searchParams, $options: "i" } }
-    //   }
-    //   const cursor = blogsCollection.find(query)
-    //   const result = await cursor.toArray()
-    //   res.send(result)
-    // })
+    
 
     app.post('/blogs', async (req, res) => {
       const newBlog = req.body
