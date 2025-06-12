@@ -30,11 +30,7 @@ async function run() {
 
     const blogsCollection= client.db('mathMatter').collection('blogs')
 
-    // app.get('/blogs', async (req, res) => {
-    //   const cursor = blogsCollection.find()
-    //   const result = await cursor.toArray()
-    //   res.send(result)
-    // })
+    
 
     app.get('/blogs/:id', async (req, res) => {
       const id = req.params.id;
