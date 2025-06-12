@@ -28,10 +28,34 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const blogsCollection= client.db('mathMatter').collection('blogs')
+    const blogsCollection = client.db('mathMatter').collection('blogs')
+    const wishlistCollection = client.db('mathMatter').collection('wishlist')
 
-    
 
+
+
+    app.get('/blogs', async (req, res) => {
+      const { category, title } = req.query;
+
+      let query = {}
+      if (category) {
+        query.category = { $regex: category, $options: "i" };
+      }
+
+      if (title) {
+        query.title = { $regex: title, $options: "i" };
+      }
+
+      const cursor = blogsCollection.find(query)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    app.get('/recentblogs', async (req, res) => {
+      const cursor = blogsCollection.find().sort({ createdAt: -1 }).limit(6)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
     app.get('/blogs/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
@@ -39,17 +63,36 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/blogs', async (req, res) => {
-      const { searchParams } = req.query
-      
-      let query = {}
-      if (searchParams) {
-        query = { category: { $regex: searchParams, $options: "i" } }
+
+    app.get('/wishlist/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { userEmail: email  }
+      const result = await wishlistCollection.find(filter).toArray();
+       for (const wish of result) {
+        const wishlistId = wish.blogId
+        const wishlistdata = await blogsCollection.findOne({
+          _id: new ObjectId(wishlistId),
+        })
+        console.log(wishlistdata);
+        wish.title = wishlistdata.title
+        wish.image = wishlistdata.image
+        wish.short_description = wishlistdata.short_description
+        wish.long_description = wishlistdata.long_description
       }
-      const cursor = blogsCollection.find(query)
-      const result = await cursor.toArray()
-      res.send(result)
+      res.send(result);
     })
+
+    // app.get('/wishlist', async (req, res) => {
+    //    const { searchParams } = req.query
+
+    //   let query = {}
+    //   if (searchParams) {
+    //     query = { cuisine: { $regex: searchParams, $options: "i" } }
+    //   }
+    //   const cursor = blogsCollection.find(query)
+    //   const result = await cursor.toArray()
+    //   res.send(result)
+    // })
 
     app.post('/blogs', async (req, res) => {
       const newBlog = req.body
@@ -57,9 +100,16 @@ async function run() {
       res.send(result)
     })
 
+    app.post('/wishlist/:blogId', async (req, res) => {
+      //  const id = req.params.blogId;
+      const wishlistBlogs = req.body
+      const result = await wishlistCollection.insertOne(wishlistBlogs)
+      res.send(result)
+    })
+
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
