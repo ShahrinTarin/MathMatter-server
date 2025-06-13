@@ -26,7 +26,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
 
     const blogsCollection = client.db('mathMatter').collection('blogs')
     const wishlistCollection = client.db('mathMatter').collection('wishlist')
@@ -74,7 +74,8 @@ async function run() {
         const wishlistdata = await blogsCollection.findOne({
           _id: new ObjectId(wishlistId),
         })
-        console.log(wishlistdata);
+        
+        
         wish.title = wishlistdata.title
         wish.image = wishlistdata.image
         wish.short_description = wishlistdata.short_description
