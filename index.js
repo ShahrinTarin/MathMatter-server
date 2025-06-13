@@ -26,14 +26,11 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const blogsCollection = client.db('mathMatter').collection('blogs')
     const wishlistCollection = client.db('mathMatter').collection('wishlist')
     const commentsCollection = client.db('mathMatter').collection('comments')
-
-
-
 
     app.get('/blogs', async (req, res) => {
       const { category, title } = req.query;
@@ -74,8 +71,6 @@ async function run() {
         const wishlistdata = await blogsCollection.findOne({
           _id: new ObjectId(wishlistId),
         })
-        
-        
         wish.title = wishlistdata.title
         wish.image = wishlistdata.image
         wish.short_description = wishlistdata.short_description
@@ -119,6 +114,14 @@ async function run() {
       const result = await blogsCollection.updateOne(filter, updateDoc);
       res.json(result);
     });
+
+    app.delete('/wishlist/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await wishlistCollection.deleteOne(query)
+      res.send(result)
+    })
+
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
