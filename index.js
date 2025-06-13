@@ -30,6 +30,7 @@ async function run() {
 
     const blogsCollection = client.db('mathMatter').collection('blogs')
     const wishlistCollection = client.db('mathMatter').collection('wishlist')
+    const commentsCollection = client.db('mathMatter').collection('comments')
 
 
 
@@ -66,9 +67,9 @@ async function run() {
 
     app.get('/wishlist/:email', async (req, res) => {
       const email = req.params.email;
-      const filter = { userEmail: email  }
+      const filter = { userEmail: email }
       const result = await wishlistCollection.find(filter).toArray();
-       for (const wish of result) {
+      for (const wish of result) {
         const wishlistId = wish.blogId
         const wishlistdata = await blogsCollection.findOne({
           _id: new ObjectId(wishlistId),
@@ -82,7 +83,12 @@ async function run() {
       res.send(result);
     })
 
-    
+
+    app.get('/comment/:blogId', async (req, res) => {
+       const blogId = req.params.blogId;
+      const result = await commentsCollection.find({ blogId: blogId }).toArray();
+      res.send(result);
+    })
 
     app.post('/blogs', async (req, res) => {
       const newBlog = req.body
@@ -95,6 +101,14 @@ async function run() {
       const result = await wishlistCollection.insertOne(wishlistBlogs)
       res.send(result)
     })
+
+    app.post('/comment/:blogId', async (req, res) => {
+      const comment = req.body
+      const result = await commentsCollection.insertOne(comment)
+      res.send(result)
+    })
+
+    
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
