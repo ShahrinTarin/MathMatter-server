@@ -108,7 +108,16 @@ async function run() {
       res.send(result)
     })
 
-    
+    app.put('/blogs/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const blog = req.body;
+      const updateDoc = {
+        $set: blog,
+      };
+      const result = await blogsCollection.updateOne(filter, updateDoc);
+      res.json(result);
+    });
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
