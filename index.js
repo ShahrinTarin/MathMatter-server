@@ -82,6 +82,7 @@ async function run() {
         wish.image = wishlistdata.image
         wish.short_description = wishlistdata.short_description
         wish.long_description = wishlistdata.long_description
+        wish.category = wishlistdata.category
       }
       res.send(result);
     })
