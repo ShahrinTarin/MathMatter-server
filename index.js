@@ -54,6 +54,13 @@ async function run() {
       const result = await cursor.toArray()
       res.send(result)
     })
+
+    app.get('/topblogs', async (req, res) => {
+      const cursor = blogsCollection.find().sort({ longDescriptionLength: -1 }).limit(10)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
     app.get('/blogs/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
@@ -88,6 +95,8 @@ async function run() {
 
     app.post('/blogs', async (req, res) => {
       const newBlog = req.body
+      const longDescriptionLength = newBlog.longDescriptionLength
+      newBlog.longDescriptionLength = parseInt(longDescriptionLength)
       const result = await blogsCollection.insertOne(newBlog)
       res.send(result)
     })
