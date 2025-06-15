@@ -16,7 +16,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: ['https://mathmatter-by-shahrin-tarin.web.app','http://localhost:5174'],
+  origin: ['https://mathmatter-by-shahrin-tarin.web.app', 'http://localhost:5174'],
   credentials: true
 }));
 app.use(express.json())
@@ -131,7 +131,7 @@ async function run() {
       res.send(result);
     })
 
-    app.post('/blogs',verifyJWT, async (req, res) => {
+    app.post('/blogs', verifyJWT, async (req, res) => {
       const newBlog = req.body
       const longDescriptionLength = newBlog.longDescriptionLength
       newBlog.longDescriptionLength = parseInt(longDescriptionLength)
@@ -152,7 +152,7 @@ async function run() {
     //   // res.send({ token, message: 'jwt created successfully' })
     // })
 
-    
+
 
     app.post('/wishlist/:blogId', async (req, res) => {
       const wishlistBlogs = req.body
@@ -160,11 +160,13 @@ async function run() {
       res.send(result)
     })
 
+
     app.post('/comment/:blogId', async (req, res) => {
       const comment = req.body
       const result = await commentsCollection.insertOne(comment)
       res.send(result)
     })
+
 
     app.put('/blogs/:id', async (req, res) => {
       const id = req.params.id;
@@ -176,6 +178,7 @@ async function run() {
       const result = await blogsCollection.updateOne(filter, updateDoc);
       res.json(result);
     });
+
 
     app.delete('/wishlist/:id', async (req, res) => {
       const id = req.params.id
