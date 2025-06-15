@@ -16,7 +16,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: ['https://mathmatter-by-shahrin-tarin.web.app', 'http://localhost:5174'],
+  origin: ['https://mathmatter-by-shahrin-tarin.web.app', 'http://localhost:5173'],
   credentials: true
 }));
 app.use(express.json())
@@ -154,10 +154,24 @@ async function run() {
 
 
 
+    // app.post('/wishlist/:blogId', async (req, res) => {
+    //   const wishlistBlogs = req.body
+    //   const result = await wishlistCollection.insertOne(wishlistBlogs)
+    //   res.send(result)
+    // })
+
+
     app.post('/wishlist/:blogId', async (req, res) => {
-      const wishlistBlogs = req.body
-      const result = await wishlistCollection.insertOne(wishlistBlogs)
-      res.send(result)
+      const { userEmail } = req.body;
+      const blogId = req.params.blogId;
+
+      const already = await wishlistCollection.findOne({ blogId, userEmail });
+      if (already) {
+        return res.status(409).send({ message: 'Blog already in wishlist', alreadyExists: true });
+      } else {
+        const result = await wishlistCollection.insertOne({ blogId, userEmail });
+        return res.status(201).send(result);
+      }
     })
 
 
