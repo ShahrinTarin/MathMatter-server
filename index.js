@@ -1,16 +1,18 @@
 require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { decode } = require('jsonwebtoken');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin:['http://localhost:5173','https://mathmatter-by-shahrin-tarin.web.app/'],
+  credentials:true
+}));
 app.use(express.json());
-
-
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4wteejr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -22,6 +24,21 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+// jwt middlewares
+const verifyJWT = (req, res, next) => {
+  const token = req?.headers?.authorization?.split(' ')[1]
+  console.log(token)
+  if (!token) return res.status(401).send({ message: 'Unauthorized Access!' })
+  jwt.verify(token,process.env.JWT_SECRET_KEY, (err, decoded) => {
+  if(err){
+    console.log(err)
+    return res.status(401).send({ message: 'Unauthorized Access!' })
+  }
+  req.tokenEmail=decoded.email
+  next()
+  })
+}
 
 async function run() {
   try {
@@ -67,10 +84,12 @@ async function run() {
       const result = await blogsCollection.findOne(query);
       res.send(result);
     })
-
-
-    app.get('/wishlist/:email', async (req, res) => {
-      const email = req.params.email;
+    app.get('/wishlist/:email', verifyJWT, async (req, res) => {
+      const decodedEmail=req.tokenEmail
+      const email = req.params.email
+      if(decodedEmail!==email){
+        return res.status(403).send({ message: 'Forbidden Access!' })
+      }
       const filter = { userEmail: email }
       const result = await wishlistCollection.find(filter).toArray();
       for (const wish of result) {
@@ -89,9 +108,22 @@ async function run() {
 
 
     app.get('/comment/:blogId', async (req, res) => {
-       const blogId = req.params.blogId;
+      const blogId = req.params.blogId;
       const result = await commentsCollection.find({ blogId: blogId }).toArray();
       res.send(result);
+    })
+
+    // generate jwt
+    app.post('/jwt', (req, res) => {
+      const user = { email: req.body.email }
+      const token = jwt.sign(user, process.env.JWT_SECRET_KEY, {
+        expiresIn: '7d'
+      })
+      res.cookie('token',token,{
+        httpOnly:true,
+        secure:false,
+      }).send({ message: 'jwt created successfully' })
+      // res.send({ token, message: 'jwt created successfully' })
     })
 
     app.post('/blogs', async (req, res) => {
