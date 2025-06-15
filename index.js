@@ -2,17 +2,25 @@ require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken')
+var admin = require("firebase-admin")
+const decoded = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf-8')
+var serviceAccount = JSON.parse(decoded)
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const { decode } = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin:['http://localhost:5173','https://mathmatter-by-shahrin-tarin.web.app/'],
-  credentials:true
+  origin: ['http://localhost:5173'],
+  credentials: true
 }));
-app.use(express.json());
+app.use(express.json())
+app.use(cookieParser())
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4wteejr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -26,18 +34,27 @@ const client = new MongoClient(uri, {
 });
 
 // jwt middlewares
-const verifyJWT = (req, res, next) => {
+const verifyJWT = async (req, res, next) => {
   const token = req?.headers?.authorization?.split(' ')[1]
-  console.log(token)
   if (!token) return res.status(401).send({ message: 'Unauthorized Access!' })
-  jwt.verify(token,process.env.JWT_SECRET_KEY, (err, decoded) => {
-  if(err){
+  try {
+    const decoded = await admin.auth().verifyIdToken(token)
+    req.tokenEmail = decoded.email
+    next()
+  }
+  catch (err) {
     console.log(err)
     return res.status(401).send({ message: 'Unauthorized Access!' })
   }
-  req.tokenEmail=decoded.email
-  next()
-  })
+
+  // jwt.verify(token,process.env.JWT_SECRET_KEY, (err, decoded) => {
+  // if(err){
+  //   console.log(err)
+  //   return res.status(401).send({ message: 'Unauthorized Access!' })
+  // }
+  // req.tokenEmail=decoded.email
+  // next()
+  // })
 }
 
 async function run() {
@@ -84,10 +101,11 @@ async function run() {
       const result = await blogsCollection.findOne(query);
       res.send(result);
     })
+
     app.get('/wishlist/:email', verifyJWT, async (req, res) => {
-      const decodedEmail=req.tokenEmail
+      const decodedEmail = req.tokenEmail
       const email = req.params.email
-      if(decodedEmail!==email){
+      if (decodedEmail !== email) {
         return res.status(403).send({ message: 'Forbidden Access!' })
       }
       const filter = { userEmail: email }
@@ -113,26 +131,28 @@ async function run() {
       res.send(result);
     })
 
-    // generate jwt
-    app.post('/jwt', (req, res) => {
-      const user = { email: req.body.email }
-      const token = jwt.sign(user, process.env.JWT_SECRET_KEY, {
-        expiresIn: '7d'
-      })
-      res.cookie('token',token,{
-        httpOnly:true,
-        secure:false,
-      }).send({ message: 'jwt created successfully' })
-      // res.send({ token, message: 'jwt created successfully' })
-    })
-
-    app.post('/blogs', async (req, res) => {
+    app.post('/blogs',verifyJWT, async (req, res) => {
       const newBlog = req.body
       const longDescriptionLength = newBlog.longDescriptionLength
       newBlog.longDescriptionLength = parseInt(longDescriptionLength)
       const result = await blogsCollection.insertOne(newBlog)
       res.send(result)
     })
+
+    // generate jwt
+    // app.post('/jwt', (req, res) => {
+    //   const user = { email: req.body.email }
+    //   const token = jwt.sign(user, process.env.JWT_SECRET_KEY, {
+    //     expiresIn: '7d'
+    //   })
+    //   res.cookie('token', token, {
+    //     httpOnly: true,
+    //     secure: false,
+    //   }).send({ message: 'jwt created successfully' })
+    //   // res.send({ token, message: 'jwt created successfully' })
+    // })
+
+    
 
     app.post('/wishlist/:blogId', async (req, res) => {
       const wishlistBlogs = req.body
