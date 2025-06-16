@@ -132,7 +132,7 @@ async function run() {
       res.send(result);
     })
 
-    app.post('/blogs', verifyJWT, async (req, res) => {
+    app.post('/blogs',verifyJWT, async (req, res) => {
       const newBlog = req.body
       const longDescriptionLength = newBlog.longDescriptionLength
       newBlog.longDescriptionLength = parseInt(longDescriptionLength)
