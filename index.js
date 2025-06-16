@@ -47,6 +47,7 @@ const verifyJWT = async (req, res, next) => {
     return res.status(401).send({ message: 'Unauthorized Access!' })
   }
 
+  // for learning
   // jwt.verify(token,process.env.JWT_SECRET_KEY, (err, decoded) => {
   // if(err){
   //   console.log(err)
@@ -139,6 +140,7 @@ async function run() {
       res.send(result)
     })
 
+    // for learning
     // generate jwt
     // app.post('/jwt', (req, res) => {
     //   const user = { email: req.body.email }
@@ -153,36 +155,24 @@ async function run() {
     // })
 
 
-
     app.post('/wishlist/:blogId', async (req, res) => {
-      const wishlistBlogs = req.body
-      const result = await wishlistCollection.insertOne(wishlistBlogs)
-      res.send(result)
+      const { userEmail } = req.body;
+      const blogId = req.params.blogId;
+
+      const already = await wishlistCollection.findOne({ blogId, userEmail });
+      if (already) {
+        return res.status(409).send({ message: 'Blog already in wishlist', alreadyExists: true });
+      } else {
+        const result = await wishlistCollection.insertOne({ blogId, userEmail });
+        return res.status(201).send(result);
+      }
     })
-
-
-
-//  app.post('/wishlist/:blogId', async (req, res) => {
-//       const { userEmail } = req.body;
-//       const blogId = req.params.blogId;
-
-//       const already = await wishlistCollection.findOne({ blogId, userEmail });
-//       if (already) {
-//         return res.status(409).send({ message: 'Blog already in wishlist', alreadyExists: true });
-//       } else {
-//         const result = await wishlistCollection.insertOne({ blogId, userEmail });
-//         return res.status(201).send(result);
-//       }
-//     })
-   
-
 
     app.post('/comment/:blogId', async (req, res) => {
       const comment = req.body
       const result = await commentsCollection.insertOne(comment)
       res.send(result)
     })
-
 
     app.put('/blogs/:id', async (req, res) => {
       const id = req.params.id;
@@ -195,14 +185,12 @@ async function run() {
       res.json(result);
     });
 
-
     app.delete('/wishlist/:id', async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) }
       const result = await wishlistCollection.deleteOne(query)
       res.send(result)
     })
-
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
@@ -212,14 +200,12 @@ async function run() {
     // await client.close();
   }
 }
+
 run().catch(console.dir);
-
-
 
 app.get('/', (req, res) => {
   res.send('MathMatter is running')
 })
-
 
 app.listen(port, () => {
   console.log(`MathMatter server is running on ${port}`);
