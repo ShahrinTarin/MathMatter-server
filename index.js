@@ -185,7 +185,7 @@ async function run() {
       res.json(result);
     });
 
-    app.delete('/wishlist/:id', async (req, res) => {
+    app.delete('/wishlist/:id',verifyJWT, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) }
       const result = await wishlistCollection.deleteOne(query)
