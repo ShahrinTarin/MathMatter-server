@@ -68,21 +68,31 @@ async function run() {
     const commentsCollection = client.db('mathMatter').collection('comments')
 
     app.get('/blogs', async (req, res) => {
-      const { category, title } = req.query;
+      const { category, title, sortBy, sortOrder } = req.query;
 
-      let query = {}
+      let query = {};
       if (category) {
         query.category = { $regex: category, $options: "i" };
       }
-
       if (title) {
         query.title = { $regex: title, $options: "i" };
       }
 
-      const cursor = blogsCollection.find(query)
-      const result = await cursor.toArray()
-      res.send(result)
-    })
+      // Default sort: newest first
+      let sortOptions = { createdAt: -1 };
+
+      if (sortBy) {
+        // If client specifies `sortBy` and optional `sortOrder`
+        const order = sortOrder === 'asc' ? 1 : -1;
+        sortOptions = {};
+        sortOptions[sortBy] = order;
+      }
+
+      const cursor = blogsCollection.find(query).sort(sortOptions);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
 
     app.get('/recentblogs', async (req, res) => {
       const cursor = blogsCollection.find().sort({ createdAt: -1 }).limit(6)
@@ -132,7 +142,7 @@ async function run() {
       res.send(result);
     })
 
-    app.post('/blogs',verifyJWT, async (req, res) => {
+    app.post('/blogs', verifyJWT, async (req, res) => {
       const newBlog = req.body
       const longDescriptionLength = newBlog.longDescriptionLength
       newBlog.longDescriptionLength = parseInt(longDescriptionLength)
@@ -185,7 +195,7 @@ async function run() {
       res.json(result);
     });
 
-    app.delete('/wishlist/:id',verifyJWT, async (req, res) => {
+    app.delete('/wishlist/:id', verifyJWT, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) }
       const result = await wishlistCollection.deleteOne(query)
