@@ -35,7 +35,16 @@ MathMatter is an interactive web application designed to make learning mathemati
 
 ---
 
+## ⚙️ Tech Stack
 
+| Tech           | Usage                        |
+|----------------|------------------------------|
+| Node.js        | Backend runtime              |
+| Express.js     | Web server framework         |
+| MongoDB        | Database (with collections: blogs, wishlist, comments) |
+| Firebase Admin | JWT authentication & decoding |
+| Cookie-Parser  | JWT cookie handling          |
+| CORS           | Cross-origin resource sharing |
 
 ---
 
