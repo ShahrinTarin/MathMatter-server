@@ -139,6 +139,21 @@ async function run() {
       res.send(result)
     })
 
+    // for learning
+    // generate jwt
+    // app.post('/jwt', (req, res) => {
+    //   const user = { email: req.body.email }
+    //   const token = jwt.sign(user, process.env.JWT_SECRET_KEY, {
+    //     expiresIn: '7d'
+    //   })
+    //   res.cookie('token', token, {
+    //     httpOnly: true,
+    //     secure: false,
+    //   }).send({ message: 'jwt created successfully' })
+    //   // res.send({ token, message: 'jwt created successfully' })
+    // })
+
+
     app.post('/wishlist/:blogId', async (req, res) => {
       const { userEmail } = req.body;
       const blogId = req.params.blogId;
