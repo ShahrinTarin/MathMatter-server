@@ -48,10 +48,7 @@ MathMatter is an interactive web application designed to make learning mathemati
 
 ---
 
-## 🔐 Middleware
 
-- **`verifyJWT`**: Ensures requests have a valid Firebase ID token and attaches the decoded email to the request.
-- Applies to secure endpoints like `GET /wishlist/:email` and `POST /blogs`.
 
 ---
 
