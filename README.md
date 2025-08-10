@@ -72,5 +72,3 @@ MathMatter is an interactive web application designed to make learning mathemati
 | GET    | `/comment/:blogId`        | View all comments for a blog          |
 
 ---
-
-## 🌐 Secret Environment Variables
