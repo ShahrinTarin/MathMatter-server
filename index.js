@@ -46,16 +46,6 @@ const verifyJWT = async (req, res, next) => {
     console.log(err)
     return res.status(401).send({ message: 'Unauthorized Access!' })
   }
-
-  // for learning
-  // jwt.verify(token,process.env.JWT_SECRET_KEY, (err, decoded) => {
-  // if(err){
-  //   console.log(err)
-  //   return res.status(401).send({ message: 'Unauthorized Access!' })
-  // }
-  // req.tokenEmail=decoded.email
-  // next()
-  // })
 }
 
 async function run() {
