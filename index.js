@@ -68,7 +68,7 @@ async function run() {
         query.title = { $regex: title, $options: "i" };
       }
 
-      // Default sort: newest first
+      
       let sortOptions = { createdAt: -1 };
 
       if (sortBy) {
