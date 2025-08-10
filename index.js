@@ -72,7 +72,6 @@ async function run() {
       let sortOptions = { createdAt: -1 };
 
       if (sortBy) {
-        // If client specifies `sortBy` and optional `sortOrder`
         const order = sortOrder === 'asc' ? 1 : -1;
         sortOptions = {};
         sortOptions[sortBy] = order;
